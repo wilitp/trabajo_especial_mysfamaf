@@ -1,4 +1,5 @@
 from random import random
+import math
 from typing import Any, Callable, List, Optional
 
 def urna(px: Callable[[Any], float], x_vals: List[Any]):
@@ -235,3 +236,15 @@ def composicion_new(ps: List[float], sims: List[Callable[[], float]]):
 def trans_inversa_con_funcion(F_1: ProbFunc):
     u = random()
     return F_1(u)
+
+def eventosPoisson(lamda,T):
+    t = 0
+    nt = 0
+    eventos = []
+    while t < T:
+        U = 1 - random()
+        t += - math.log(U) / lamda
+        if t <= T:
+            nt += 1
+            eventos.append(t)
+    return nt, eventos

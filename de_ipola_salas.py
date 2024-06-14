@@ -3,6 +3,8 @@ import random
 import math
 import matplotlib.pyplot as plt
 
+import time
+
 def solucion_alternativa_1(ops = 1, TF=1, TR=8, N=7, S=3):
     t = 0
     broken_qty = 0
@@ -104,20 +106,70 @@ def solucion_sugerida(ops = 1, TF=1, TR=8, N=7, S=3):
                 raise Exception("Cantidad negativa de maquinas rotas: ", available_work, broken_qty, working, repair_times)
 
 
-
-def gen_ej1(): return solucion_alternativa_1(ops=2)
-def gen_ej2(): return solucion_alternativa_1(S=4)
-def gen_ej1_2(): return solucion_sugerida(ops=2)
-def gen_ej1_3(): return solucion_alternativa_2(ops=2)
-
+# ===================== TESTS =====================
 n = 10_000
+# --------------------- TIME ---------------------
+def timed(sim, show=False): 
+    
+    t0 = time.perf_counter()
+    esp,var = lib.sim_esp_var(sim, n*5)
+    t = time.perf_counter()
+    
+    if show: print(f"esp {esp:.4f}, runtime {t-t0:.4f}")
+    return t - t0
+# --------------------- Faliure time ---------------------
+def proposed_solutions_test(sim, show=False):
+    
+    def extra_worker(): return(sim(ops=2))
+    def extra_machine():return(sim(S=4))
+    def default():      return(sim())
+    
+    esp1,var1 = lib.sim_esp_var(extra_worker, n)
+    esp2,var2 = lib.sim_esp_var(extra_machine, n)
+    esp3,var3 = lib.sim_esp_var(default, n)
+    
+    if show: print(f"actual {esp3:.4f}, ops+1 {esp1:.4f}, S+1 {esp2:.4f}")
+    return esp1, esp2, esp3
+ 
+# ===================== METRICS =====================
 
-esp1,var = lib.sim_esp_var(gen_ej1, n)
-print(esp1, var)
-esp2,var = lib.sim_esp_var(gen_ej2, n)
-print(esp2, var)
 
-plt.hist[esp1,esp2]
-plt.show()
-# esp,var = lib.sim_esp_var(gen_ej1_3, n)
-# print(esp, var)
+def bar_plot_expected_fail_time():
+    
+    esp_extra_worker, esp_extra_machine, esp_def = \
+        proposed_solutions_test(solucion_alternativa_1)
+    
+    data = {
+        "Sistema Original": esp_def,
+        "Extra Operario": esp_extra_worker,
+        "Extra Maquina": esp_extra_machine
+    }
+
+    categories = list(data.keys())
+    values = list(data.values())
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(categories, values, color=["#ffe28a","#fb2e01","#6fcb9f"])
+
+    plt.title('Tiempo esperado de fallas')
+    plt.ylabel('Tiempo promedio (meses)')
+
+    plt.savefig('comparacion_mejoras.png')  
+
+if __name__ == "__main__":
+    # t1 = timed(solucion_alternativa_1   ,True)
+    # t2 = timed(solucion_alternativa_2   ,True)
+    # t3 = timed(solucion_sugerida        ,True)
+    
+    esp_extra_worker, esp_extra_machine, esp_def = \
+        proposed_solutions_test(solucion_alternativa_1,True)
+    # proposed_solutions_test(solucion_alternativa_2,True)
+    # proposed_solutions_test(solucion_sugerida,True)
+    
+    
+    print(f"mejora ops++ {esp_extra_worker/esp_def :.4f},\
+        mejora S++ {esp_extra_machine/esp_def:.4f}")
+    
+
+    # bar_plot_expected_fail_time()
+    

@@ -1,0 +1,4 @@
+matplotib
+numpy
+math
+random

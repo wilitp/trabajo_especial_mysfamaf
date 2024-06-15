@@ -1,9 +1,9 @@
 import lib
-import random
 import math
-import matplotlib.pyplot as plt
+import random
 
 import time
+import matplotlib.pyplot as plt
 
 def solucion_alternativa_1(ops = 1, TF=1, TR=8, N=7, S=3):
     t = 0
@@ -109,14 +109,18 @@ def solucion_sugerida(ops = 1, TF=1, TR=8, N=7, S=3):
 # ===================== TESTS =====================
 n = 10_000
 # --------------------- TIME ---------------------
-def timed(sim, show=False): 
-    
-    t0 = time.perf_counter()
-    esp,var = lib.sim_esp_var(sim, n*5)
-    t = time.perf_counter()
-    
-    if show: print(f"esp {esp:.4f}, runtime {t-t0:.4f}")
-    return t - t0
+def timed(sim, show=False):
+    times = [] 
+    # CUIDADO CON EL RANGO DEL LOOP, entre 50 y 100 tarda minutos
+    for _ in range(10): 
+        t0 = time.perf_counter()
+        esp,var = lib.sim_esp_var(sim, n)
+        t = time.perf_counter()
+        times.append(t-t0)
+    avg = sum(times)/len(times)
+    if show: print(f"esp {esp:.4f}, runtime {avg:.4f}")
+    return avg
+
 # --------------------- Faliure time ---------------------
 def proposed_solutions_test(sim, show=False):
     
@@ -154,22 +158,73 @@ def bar_plot_expected_fail_time():
     plt.title('Tiempo esperado de fallas')
     plt.ylabel('Tiempo promedio (meses)')
 
-    plt.savefig('comparacion_mejoras.png')  
+    plt.savefig('comparacion_mejoras.png')
+      
+def bar_plot_expected_fail_time_5workers():
+    
+    def original():return solucion_alternativa_1()
+    def extra_workers():return solucion_alternativa_1(ops=5)
+    
+    esp_def, _ = lib.sim_esp_var(original, n)
+    esp_extra_worker, _ = lib.sim_esp_var(extra_workers, n)
+    
+    data = {
+        "Sistema Original": esp_def,
+        "Sistema con 5 Operarios": esp_extra_worker,
+    }
+
+    categories = list(data.keys())
+    values = list(data.values())
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(categories, values, color=["#ffe28a","#fb2e01"])
+
+    plt.title('Tiempo esperado con distinta cantidad de operarios')
+    plt.ylabel('Tiempo promedio (meses)')
+
+    plt.savefig('comparacion_original_extra_op.png')  
+
+def bar_plot_performance():
+    # Recomendado para los tiempos cambiar la linea 115 
+    
+    t1 = timed(solucion_alternativa_1)
+    t2 = timed(solucion_alternativa_2)
+    t3 = timed(solucion_sugerida)
+    
+    data = {
+        "Algoritmo sugerido por la catedra": t3,
+        "Algoritmo alternativo 1":t1,
+        "Algoritmo alternativo 2":t2,
+    }
+
+    categories = list(data.keys())
+    values = list(data.values())
+
+    plt.figure(figsize=(10, 6))    
+    plt.bar(categories, values, color=["#ffe28a","#fb2e01","#6fcb9f"])
+
+
+    plt.title('Diferencia de rendimiento (tiempo) entre diferentes implementaciones')
+    plt.ylabel('Tiempo promedio (segundos)')
+    
+    plt.savefig('comparacion_tiempos.png')  
 
 if __name__ == "__main__":
     # t1 = timed(solucion_alternativa_1   ,True)
     # t2 = timed(solucion_alternativa_2   ,True)
     # t3 = timed(solucion_sugerida        ,True)
     
-    esp_extra_worker, esp_extra_machine, esp_def = \
-        proposed_solutions_test(solucion_alternativa_1,True)
+    # esp_extra_worker, esp_extra_machine, esp_def = \
+    #     proposed_solutions_test(solucion_alternativa_1,True)
     # proposed_solutions_test(solucion_alternativa_2,True)
     # proposed_solutions_test(solucion_sugerida,True)
     
     
-    print(f"mejora ops++ {esp_extra_worker/esp_def :.4f},\
-        mejora S++ {esp_extra_machine/esp_def:.4f}")
+    # print(f"mejora ops++ {esp_extra_worker/esp_def :.4f},\
+    #     mejora S++ {esp_extra_machine/esp_def:.4f}")
     
 
     # bar_plot_expected_fail_time()
-    
+    # bar_plot_expected_fail_time_5workers()
+    # bar_plot_performance()
+    pass

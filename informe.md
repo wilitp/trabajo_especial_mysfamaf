@@ -22,7 +22,11 @@ Esta es una solución que es válida para cualquier tipo de distribución y es p
 
 ### Algoritmo alternativo 1 (o iteración sobre siguiente paso)
 
-Para llegar a este algoritmo se hizo un análisis teórico del problema. Como ambos procesos (las reparaciones y las rupturas) tienen distribuciones exponenciales, se podría decir que son procesos de poisson. En particular, las reparaciones siguen esta distribución siempre que haya al menos una maquina para arreglar. Luego, se puede ver que cada ruptura es un proceso independiente, por lo que la tasa del proceso conjunto es $\lambda = \lambda_0+\lambda_1+...+\lambda_N$ siendo $\lambda_i$ la tasa de cada maquina individual. Finalmente, la próxima falla tiene distribución $F \sim \exp(\lambda)$, en particular, como $\lambda_i = T_{\text{falla}}$ entonces $\lambda = N\cdot T_{\text{falla}}$. Análogamente, se llega a que las reparaciones tienen una distribución $R \sim \exp(M\cdot T_{\text{reparacion}})$ donde $M = \min(\text{operarios },\text{maquinas averiadas})$. 
+En este algoritmo aprovechamos que los tiempos de ruptura y de reparación son variables exponenciales para hacer la simulación más eficiente.
+
+Primero observemos que, en cualquier momento dado $t_0$, hay N máquinas en funcionamiento. Sean $X_1, X_2, ..., X_N$ los tiempos de ruptura de cada máquina tenemos que la siguiente ruptura es $min_{1 \le i \le N}\{X_i\}$. Sabemos que este mínimo distribuye exponencial con media $\frac{1}{N * T_F}$.
+
+Por otro lado, haciendo el mismo análisis, si $M$ es la cantidad de máquinas en reparación en un momento dado, tenemos que el tiempo esperado hasta la próxima reparación es $\frac{1}{M * T_R}$.
 
 Una vez el desarrollo teórico está establecido, podemos hablar del algoritmo. La idea es en cada  momento ver cuál es el próximo evento que va a suceder. En caso de que no haya ninguna maquina averiada, solo se puede romper una maquina. Por esto, se simula una variable aleatoria con distribución $F$. En caso que haya al menos una maquina rota, se ve cuál evento sucede primero, si una ruptura o una reparación. Para esto se simulan ambos eventos con sus respectivas variables. 
 
@@ -34,13 +38,18 @@ En términos de legibilidad y mantenibilidad, el algoritmo es claramente superio
 
 Este algoritmo vuelve a utilizar el resultado teórico sobre las distribuciones, por lo que tampoco lleva una memoria de todos los eventos simulados. La idea de este algoritmo surge tras ver que las rupturas suceden mucho mas rápido que las reparaciones. es por esto que se genera una reparación, luego se simulan posibles fallas que “caen entre reparaciones”. 
 
+Otra forma de simular este escenario es el de simular desde el tiempo $t_0$ el tiempo $X$ hasta la siguiente ruptura usando una exponencial de media $\frac{1}{N * T_F}$, tal y como discutimos arriba, pero simulando las reparaciones como un proceso de Poisson homogeneo con tasa $M * T_R$ en la ventana de tiempo $t_0$ a $t_0 + X$.
+
+Luego de simular los eventos de esta ventana de tiempo, actualizamos el estado de maquinas rotas y respuestos y simulamos la siguiente ventana de tiempo a menos que dejen de darse las condiciones necesarias para la operación del supermercado.
+
+
 ## Resultados
 
-Tras correr los tres escenarios con una misma implementación, descubrimos que aumentar la cantidad de operarios es la mejor forma de extender el tiempo medio de falla del supermercado. 
+Tras correr los tres escenarios con uno de los algoritmos, descubrimos que aumentar la cantidad de operarios es la mejor forma de extender el tiempo medio de falla del supermercado. 
 
 ![comparacion_mejoras.png](comparacion_mejoras.png)
 
-Los datos que se ven el gráfico fueron obtenidos simulando 10.000 veces cada escenario. Como puede verse, el tiempo de fallo agregando un operario se duplica, mientras que si se agrega una maquina de repuesto, solo crece un 50%. Por la forma en que los tres algoritmos están construidos, es fácil jugar con valores para los parámetros y ver como se modifica el tiempo de falla promedio. En el siguiente gráfico se ve uno de estos juegos, donde se compara el sistema original y un supermercado con 5 reparadores de maquinas.
+Los datos que se ven en el gráfico fueron obtenidos simulando 10.000 veces cada escenario. Como puede verse, el tiempo de fallo agregando un operario se duplica, mientras que si se agrega una maquina de repuesto, solo crece un 50%. Por la forma en que los tres algoritmos están construidos, es fácil jugar con valores para los parámetros y ver como se modifica el tiempo de falla promedio. En el siguiente gráfico se ve uno de estos juegos, donde se compara el sistema original y un supermercado con 5 reparadores de maquinas.
 
 ![comparacion_original_extra_op.png](comparacion_original_extra_op.png)
 

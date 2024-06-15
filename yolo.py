@@ -125,11 +125,11 @@ def gen_ej1(): return sim(ops=2)
 def gen_ej1_2(): return sim_ross(ops=2)
 def gen_ej1_3(): return sim_original(R=2)
 
-n = 10_000
+n = 100_000
 
 esp,var = lib.sim_esp_var(gen_ej1, n)
-print(esp, var)
+print(esp, math.sqrt(var))
 esp,var = lib.sim_esp_var(gen_ej1_2, n)
-print(esp, var)
+print(esp, math.sqrt(var))
 esp,var = lib.sim_esp_var(gen_ej1_3, n)
-print(esp, var)
+print(esp, math.sqrt(var))

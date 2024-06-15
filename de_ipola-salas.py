@@ -214,14 +214,14 @@ if __name__ == "__main__":
     # t2 = timed(solucion_alternativa_2   ,True)
     # t3 = timed(solucion_sugerida        ,True)
     
-    # esp_extra_worker, esp_extra_machine, esp_def = \
-    #     proposed_solutions_test(solucion_alternativa_1,True)
+    esp_extra_worker, esp_extra_machine, esp_def = \
+        proposed_solutions_test(solucion_alternativa_1,True)
     # proposed_solutions_test(solucion_alternativa_2,True)
     # proposed_solutions_test(solucion_sugerida,True)
     
     
-    # print(f"mejora ops++ {esp_extra_worker/esp_def :.4f},\
-    #     mejora S++ {esp_extra_machine/esp_def:.4f}")
+    print(f"mejora ops++ {esp_extra_worker/esp_def :.4f},\
+        mejora S++ {esp_extra_machine/esp_def:.4f}")
     
 
     # bar_plot_expected_fail_time()
